@@ -1,0 +1,177 @@
+/* -------------------------------------------------------------------------- */
+/*                                TAILWIND SETUP                              */
+/* -------------------------------------------------------------------------- */
+@import "tailwindcss";
+@reference "tailwindcss";
+
+/* -------------------------------------------------------------------------- */
+/*                                  BASE LAYER                                */
+/* -------------------------------------------------------------------------- */
+@layer base {
+  body {
+    font-family: var(--font-poppins), sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    @apply antialiased;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              COMPONENTS LAYER                              */
+/* -------------------------------------------------------------------------- */
+@layer components {
+  /* Scrollbar Styles -------------------------------------------------------- */
+  .scrollbar-visible {
+    overflow-x: scroll !important;
+  }
+
+  .scrollbar-visible::-webkit-scrollbar {
+    height: 10px !important;
+    background-color: rgba(200, 200, 200, 0.3);
+  }
+
+  .scrollbar-visible::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.7);
+    border-radius: 5px;
+  }
+
+  @supports (-webkit-touch-callout: none) {
+    .scrollbar-visible::-webkit-scrollbar {
+      -webkit-appearance: none;
+      height: 8px !important;
+    }
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .horizontal-scroll {
+    overflow-x: scroll !important;
+    scrollbar-width: auto;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+  }
+
+  .horizontal-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  .placeholder-center::placeholder {
+    text-align: center;
+  }
+
+  .ant-select-selection-item {
+    color: grey;
+  }
+
+  :where(.css-dev-only-do-not-override-7ny38l).ant-menu-light.ant-menu-horizontal
+    > .ant-menu-item-selected,
+  :where(.css-dev-only-do-not-override-7ny38l).ant-menu-light
+    > .ant-menu.ant-menu-horizontal
+    > .ant-menu-item-selected,
+  :where(.css-dev-only-do-not-override-7ny38l).ant-menu-light.ant-menu-horizontal
+    > .ant-menu-submenu-selected,
+  :where(.css-dev-only-do-not-override-7ny38l).ant-menu-light
+    > .ant-menu.ant-menu-horizontal
+    > .ant-menu-submenu-selected {
+    color: #784ca0;
+    background-color: transparent;
+  }
+
+  .rating-container {
+    display: flex !important;
+    flex-direction: row !important;
+  }
+
+  .margin-bottom-unset {
+    margin-bottom: 0 !important;
+  }
+
+  @media (min-width: 1024px) {
+    .custom-swiper .swiper-wrapper {
+      width: 99vw !important;
+      justify-content: center !important;
+    }
+  }
+
+  .swiper-slide {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               UTILITIES LAYER                              */
+/* -------------------------------------------------------------------------- */
+@layer utilities {
+  /* Animations -------------------------------------------------------------- */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes popIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fadeInUp {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .animate-slideInLeft {
+    animation: slideInLeft 0.8s ease-out forwards;
+  }
+
+  .animate-popIn {
+    animation: popIn 0.6s ease-out forwards;
+  }
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradientMove 12s ease infinite;
+}

@@ -9,7 +9,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "/" },
     { name: "Browse Cars", href: "/browse" },
-    { name: "Auction Calendar", href: "/calendar" },
+    { name: "Auction Calendar", href: "/auctionCalender" },
     { name: "About", href: "/about" },
   ];
 
@@ -22,10 +22,7 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link
-              href="/"
-              className="flex items-center space-x-3 flex-shrink-0"
-            >
+            <Link href="/" className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-blue-900 rounded-sm flex items-center justify-center">
                 <span className="text-white font-bold text-lg">CA</span>
               </div>
@@ -58,7 +55,7 @@ const Navbar = () => {
             {/* Sign In Button - Desktop */}
             <div className="hidden lg:block">
               <Link
-                href="/signin"
+                href="/siglnin"
                 className="bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-900 transition shadow-md"
               >
                 Sign In

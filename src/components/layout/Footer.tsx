@@ -6,13 +6,10 @@ const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-200 py-10 px-6 md:px-10 lg:px-20">
       <div className="max-w-7xl mx-auto">
-        {/* Main Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16">
-          {/* Logo + Description */}
           <div className="flex flex-col">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-blue-900 rounded-sm flex items-center justify-center">
-                {/* You can replace this with actual logo */}
                 <span className="text-white font-bold text-lg">
                   CA
                 </span>
@@ -40,7 +37,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/calendar"
+                  href="/"
                   className="hover:text-blue-600 transition"
                 >
                   Auction Calendar
@@ -48,14 +45,14 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/no-reserve"
+                  href="/"
                   className="hover:text-blue-600 transition"
                 >
                   No Reserve Cars
                 </Link>
               </li>
               <li>
-                <Link href="/latest" className="hover:text-blue-600 transition">
+                <Link href="/" className="hover:text-blue-600 transition">
                   Latest Additions
                 </Link>
               </li>
@@ -75,7 +72,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/how-it-works"
+                  href="/"
                   className="hover:text-blue-600 transition"
                 >
                   How It Works
@@ -83,7 +80,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/auction-houses"
+                  href="/"
                   className="hover:text-blue-600 transition"
                 >
                   Auction Houses
@@ -91,7 +88,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/price-guide"
+                  href="/"
                   className="hover:text-blue-600 transition"
                 >
                   Price Guide

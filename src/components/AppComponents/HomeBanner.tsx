@@ -4,8 +4,7 @@ import Image from "next/image";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50">
-      {/* Background Grid Pattern (optional but looks premium) */}
+    <section className="relative min-h-screen flex items-center overflow-hidden from-gray-50 via-white to-blue-50">
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
@@ -31,22 +30,21 @@ export default function HeroSection() {
             Australia. All in one place. Updated in real-time.
           </p>
 
-          {/* Quick Search Form */}
-          <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto lg:mx-0">
+          <div className="flex flex-col sm:flex-row gap-1 max-w-xl mx-auto lg:mx-0">
             <input
               type="text"
               placeholder="Make"
-              className="px-4 py-4 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
+              className="px-3 py-2 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
             />
             <input
               type="text"
               placeholder="Model"
-              className="px-4 py-4 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
+              className="px-3 py-2 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
             />
             <input
               type="text"
               placeholder="Variant"
-              className="px-4 py-4 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
+              className="px-3 py-2 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
             />
           </div>
 

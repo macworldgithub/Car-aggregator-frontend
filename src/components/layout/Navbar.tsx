@@ -55,7 +55,7 @@ const Navbar = () => {
             {/* Sign In Button - Desktop */}
             <div className="hidden lg:block">
               <Link
-                href="/siglnin"
+                href="/signin"
                 className="bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-900 transition shadow-md"
               >
                 Sign In

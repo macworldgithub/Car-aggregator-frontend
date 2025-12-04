@@ -12,8 +12,8 @@ const states = [
 
 export default function AuctionCalendarHero() {
   return (
-    <section className="relative min-h-[85vh] bg-white overflow-hidden flex flex-col pt-20">
-      <div className="absolute inset-0 pointer-events-none">
+    <section className="relative min-h-[85vh] bg-white overflow-hidden flex flex-col pt-18 -pb-28">
+      <div className="absolute inset-0 pointer-events-none md:mb-18 hidden md:block ">
         <div className="absolute left-0 bottom-0 w-[65%] sm:w-[55%] md:w-[50%] lg:w-[45%] xl:w-[40%] ">
           <Image
             src="/images/fullcar.png"
@@ -33,7 +33,7 @@ export default function AuctionCalendarHero() {
       </div>
 
       <div className="relative z-10 flex flex-col justify-center w-full md:w-[55%] ml-auto px-2 sm:px-6 lg:px-8">
-        <h1 className="text-xl sm:text-3xl md:text-5xl text-gray-900 mb-6">
+        <h1 className="text-xl sm:text-3xl md:text-5xl text-gray-900 mb-6 font-bold">
           Auction Calendar
         </h1>
 

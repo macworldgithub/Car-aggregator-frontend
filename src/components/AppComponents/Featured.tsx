@@ -89,9 +89,8 @@ export default function FeaturedLots() {
         setError(null);
 
         const params = new URLSearchParams({
-          newly_added: "14d", // last 14 days – adjust as needed
-          // sort: "auction_end asc",   // uncomment if you want upcoming first
-          // limit: "12",               // try if the API supports it
+          newly_added: "30d", // zyada din ka data → zyada items aayenge
+          // sort: "auction_end asc", // agar upcoming auctions pehle chahiye to uncomment kar dena
         });
 
         const url = `https://aggregator.omnisuiteai.com/api/search?${params}`;
@@ -107,19 +106,20 @@ export default function FeaturedLots() {
 
         const data: AuctionLot[] = await res.json();
 
-        console.log("API returned items:", data.length);
+        console.log("Total items from API:", data.length);
+        console.log(
+          "First few items titles:",
+          data
+            .slice(0, 3)
+            .map(
+              (item) =>
+                item.title ||
+                `${item.year || ""} ${item.make || ""} ${item.model || ""}`
+            )
+        );
 
-        // Very loose filter – show almost everything that has some info
-        const featured = data
-          .filter(
-            (item) =>
-              item.title?.trim() || (item.make?.trim() && item.model?.trim())
-          )
-          .slice(0, 4);
-
-        console.log("Displayed items after filter:", featured.length);
-
-        setLots(featured);
+        // Koi filter nahi laga rahe → sab show karo
+        setLots(data);
       } catch (err: any) {
         console.error("Fetch failed:", err);
         setError("Failed to load featured lots");
@@ -164,7 +164,7 @@ export default function FeaturedLots() {
           </div>
         ) : lots.length === 0 ? (
           <div className="text-center py-16 text-gray-600">
-            No featured vehicles available right now
+            No lots available right now
           </div>
         ) : (
           <>
@@ -179,7 +179,7 @@ export default function FeaturedLots() {
                     .filter(Boolean)
                     .join(" ")
                     .trim() ||
-                  "Classic Vehicle";
+                  "Classic Vehicle / Item";
 
                 const badge = getBadge(car);
 

@@ -21,8 +21,12 @@ export default function AdvancedSearch() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold text-gray-900 mb-2">Advanced Search</h2>
-          <p className="text-gray-600">Find your dream classic with our comprehensive search engine</p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-2">
+            Advanced Search
+          </h2>
+          <p className="text-gray-600">
+            Find your dream classic with our comprehensive search engine
+          </p>
         </div>
 
         {/* Main Search Card */}
@@ -74,7 +78,9 @@ export default function AdvancedSearch() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {/* Make */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Make</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Make
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-200">
                       <option>All Makes</option>
                       <option>Holden</option>
@@ -84,7 +90,9 @@ export default function AdvancedSearch() {
 
                   {/* Model */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Model</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Model
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl">
                       <option>All Models</option>
                     </select>
@@ -93,37 +101,65 @@ export default function AdvancedSearch() {
                   {/* Year Range */}
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">From</label>
-                      <input type="text" placeholder="e.g. 1960" className="w-full px-5 py-4 bg-gray-100 rounded-xl" />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        From
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 1960"
+                        className="w-full px-5 py-4 bg-gray-100 rounded-xl"
+                      />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">To</label>
-                      <input type="text" placeholder="e.g. 1980" className="w-full px-5 py-4 bg-gray-100 rounded-xl" />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        To
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 1980"
+                        className="w-full px-5 py-4 bg-gray-100 rounded-xl"
+                      />
                     </div>
                   </div>
 
                   {/* Price Range */}
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Min</label>
-                      <input type="text" placeholder="$10,000" className="w-full px-5 py-4 bg-gray-100 rounded-xl" />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Min
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="$10,000"
+                        className="w-full px-5 py-4 bg-gray-100 rounded-xl"
+                      />
                     </div>
                     <div className="flex-1">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Max</label>
-                      <input type="text" placeholder="$500,000" className="w-full px-5 py-4 bg-gray-100 rounded-xl" />
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Max
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="$500,000"
+                        className="w-full px-5 py-4 bg-gray-100 rounded-xl"
+                      />
                     </div>
                   </div>
 
                   {/* State & Auction House */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      State
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl">
                       <option>All States</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Auction House</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Auction House
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl">
                       <option>All houses</option>
                     </select>
@@ -131,21 +167,27 @@ export default function AdvancedSearch() {
 
                   {/* Body Style, Transmission, Additional */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Body Style</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Body Style
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl">
                       <option>All Style</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Transmission</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Transmission
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl">
                       <option>All Types</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Additional</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Additional
+                    </label>
                     <select className="w-full px-5 py-4 bg-gray-100 rounded-xl">
                       <option>Options</option>
                     </select>

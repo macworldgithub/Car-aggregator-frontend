@@ -1,9 +1,9 @@
-// src/components/AppComponents/Featured.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Heart, Calendar, MapPin } from "lucide-react";
+import { Heart, Calendar, MapPin, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface AuctionLot {
   _id: string;
@@ -68,7 +68,7 @@ const formatDate = (dateStr?: string | null): string => {
 };
 
 const getLocation = (
-  loc?: string | { city?: string; state?: string }
+  loc?: string | { city?: string; state?: string },
 ): string => {
   if (!loc) return "Australia";
   if (typeof loc === "string") return loc;
@@ -78,58 +78,83 @@ const getLocation = (
 
 export default function FeaturedLots() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [lots, setLots] = useState<AuctionLot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchFeaturedLots = async () => {
+    const fetchLots = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const params = new URLSearchParams({
-          newly_added: "14d", // last 14 days – adjust as needed
-          // sort: "auction_end asc",   // uncomment if you want upcoming first
-          // limit: "12",               // try if the API supports it
+        const params = new URLSearchParams();
+
+        // Get all possible filters from URL
+        const filterKeys = [
+          "make",
+          "model",
+          "year_min",
+          "year_max",
+          "price_min",
+          "price_max",
+          "state",
+          "auction_house",
+          "no_reserve",
+          "body_style",
+          "transmission",
+          "newly_added",
+          "sort",
+        ];
+
+        filterKeys.forEach((key) => {
+          const value = searchParams.get(key);
+          if (value !== null) {
+            params.set(key, value);
+          }
         });
 
-        const url = `https://aggregator.omnisuiteai.com/api/search?${params}`;
+        // Default behavior when no filters are applied
+        if (params.toString() === "") {
+          params.set("newly_added", "14d");
+          params.set("sort", "auction_date desc");
+        }
+
+        // Try to get more items (if API supports)
+        params.set("limit", "100");
+
+        const url = `https://aggregator.omnisuiteai.com/api/search?${params.toString()}`;
 
         const res = await fetch(url, {
           headers: { Accept: "application/json" },
           cache: "no-store",
         });
 
-        if (!res.ok) {
-          throw new Error(`API error: ${res.status} ${res.statusText}`);
-        }
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
 
-        const data: AuctionLot[] = await res.json();
+        const data = await res.json();
 
-        console.log("API returned items:", data.length);
+        // Filter valid lots
+        const validLots = Array.isArray(data)
+          ? data.filter(
+              (item) =>
+                item.title?.trim() || (item.make?.trim() && item.model?.trim()),
+            )
+          : [];
 
-        // Very loose filter – show almost everything that has some info
-        const featured = data
-          .filter(
-            (item) =>
-              item.title?.trim() || (item.make?.trim() && item.model?.trim())
-          )
-          .slice(0, 4);
-
-        console.log("Displayed items after filter:", featured.length);
-
-        setLots(featured);
+        setLots(validLots);
       } catch (err: any) {
-        console.error("Fetch failed:", err);
-        setError("Failed to load featured lots");
+        console.error("Fetch error:", err);
+        setError("Failed to load lots");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFeaturedLots();
-  }, []);
+    fetchLots();
+  }, [searchParams]); // Re-fetch when URL params change
 
   return (
     <section className="py-12 px-4 bg-gray-50 sm:px-6 lg:px-8">
@@ -149,30 +174,34 @@ export default function FeaturedLots() {
         </div>
 
         {loading ? (
-          <div className="text-center py-16 text-gray-600 font-medium">
-            Loading featured classics...
+          <div className="flex justify-center items-center py-16">
+            <Loader2 className="w-10 h-10 animate-spin text-indigo-900" />
           </div>
         ) : error ? (
           <div className="text-center py-16 text-red-600">
             {error}
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 block mx-auto px-6 py-2 bg-indigo-900 text-white rounded-lg hover:bg-indigo-800 transition"
+              className="mt-6 px-8 py-3 bg-indigo-900 text-white rounded-xl hover:bg-indigo-800"
             >
               Try Again
             </button>
           </div>
         ) : lots.length === 0 ? (
-          <div className="text-center py-16 text-gray-600">
-            No featured vehicles available right now
+          <div className="text-center py-16 text-gray-600 text-lg">
+            No matching vehicles found
           </div>
         ) : (
-          <>
+          <div className="space-y-10">
+            <p className="text-center text-gray-700 font-medium">
+              Showing {lots.length} classic cars
+            </p>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
               {lots.map((car) => {
                 const primaryImage =
-                  car.images?.[0] || "/images/placeholder-car.jpg";
-
+                  car.images?.[0]?.split("?")[0] ||
+                  "/images/placeholder-car.jpg";
                 const displayTitle =
                   car.title?.trim() ||
                   [car.year, car.make, car.model]
@@ -180,7 +209,6 @@ export default function FeaturedLots() {
                     .join(" ")
                     .trim() ||
                   "Classic Vehicle";
-
                 const badge = getBadge(car);
 
                 return (
@@ -192,19 +220,15 @@ export default function FeaturedLots() {
                       <img
                         src={primaryImage}
                         alt={displayTitle}
-                        width={600}
-                        height={400}
                         className="w-full h-52 sm:h-60 object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-
                       {badge && (
                         <span
-                          className={`${badge.color} text-white text-xs font-bold px-3 py-1.5 rounded-full absolute top-4 left-4 shadow-lg`}
+                          className={`${badge.color} text-white text-xs font-bold px-3 py-1.5 rounded-full absolute top-4 left-4 shadow-lg uppercase`}
                         >
                           {badge.text}
                         </span>
                       )}
-
                       <button className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition shadow-md">
                         <Heart className="w-5 h-5 text-gray-700 hover:fill-red-500 hover:text-red-500 transition" />
                       </button>
@@ -214,11 +238,9 @@ export default function FeaturedLots() {
                       <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-2 min-h-[3.5rem]">
                         {displayTitle}
                       </h3>
-
                       <p className="text-xl font-extrabold text-indigo-900 mb-4">
                         {formatPrice(car)}
                       </p>
-
                       <div className="space-y-2 text-sm text-gray-600 mb-6">
                         <div className="flex items-center gap-2">
                           <Calendar className="w-4 h-4" />
@@ -234,12 +256,11 @@ export default function FeaturedLots() {
                           via {mapSourceToHouse(car.source)}
                         </p>
                       </div>
-
                       <button
                         onClick={() =>
                           router.push(`/auctionDetail?id=${car._id}`)
                         }
-                        className="w-full bg-indigo-900 text-white font-semibold py-3.5 rounded-xl hover:bg-indigo-800 transition active:scale-95"
+                        className="w-full bg-indigo-900 text-white font-semibold py-3.5 rounded-xl hover:bg-indigo-800 transition"
                       >
                         View Details
                       </button>
@@ -248,13 +269,7 @@ export default function FeaturedLots() {
                 );
               })}
             </div>
-
-            <div className="text-center mt-12">
-              <button className="bg-indigo-900 text-white font-bold px-12 py-4 rounded-xl hover:bg-indigo-800 transition text-lg">
-                View All Lots
-              </button>
-            </div>
-          </>
+          </div>
         )}
       </div>
     </section>

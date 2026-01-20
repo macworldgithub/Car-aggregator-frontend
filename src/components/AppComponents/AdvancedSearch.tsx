@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { Filter } from "lucide-react";
+import { Filter, Search } from "lucide-react";
 
 const quickFilters = [
   "No Reserve",
@@ -20,6 +20,7 @@ export default function AdvancedSearch() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [filters, setFilters] = useState({
+    title: searchParams.get("title") || "",
     make: searchParams.get("make") || "",
     model: searchParams.get("model") || "",
     year_min: searchParams.get("year_min") || "",
@@ -28,7 +29,7 @@ export default function AdvancedSearch() {
     price_max: searchParams.get("price_max") || "",
     state: searchParams.get("state") || "",
     auction_house: searchParams.get("auction_house") || "",
-    no_reserve: searchParams.get("no_reserve") === "true", // only true if explicitly set
+    no_reserve: searchParams.get("no_reserve") === "true",
     body_style: searchParams.get("body_style") || "",
     transmission: searchParams.get("transmission") || "",
     newly_added: searchParams.get("newly_added") || "",
@@ -46,48 +47,39 @@ export default function AdvancedSearch() {
   const applyFilters = () => {
     const params = new URLSearchParams();
 
-    // Only add if user actually set a value (non-empty)
+    if (filters.title.trim()) params.set("title", filters.title.trim());
     if (filters.make.trim()) params.set("make", filters.make.trim());
     if (filters.model.trim()) params.set("model", filters.model.trim());
-    if (filters.year_min.trim())
-      params.set("year_min", filters.year_min.trim());
-    if (filters.year_max.trim())
-      params.set("year_max", filters.year_max.trim());
-    if (filters.price_min.trim())
-      params.set("price_min", filters.price_min.trim());
-    if (filters.price_max.trim())
-      params.set("price_max", filters.price_max.trim());
+    if (filters.year_min.trim()) params.set("year_min", filters.year_min.trim());
+    if (filters.year_max.trim()) params.set("year_max", filters.year_max.trim());
+    if (filters.price_min.trim()) params.set("price_min", filters.price_min.trim());
+    if (filters.price_max.trim()) params.set("price_max", filters.price_max.trim());
     if (filters.state.trim()) params.set("state", filters.state.trim());
-    if (filters.auction_house.trim())
-      params.set("auction_house", filters.auction_house.trim());
-    if (filters.body_style.trim())
-      params.set("body_style", filters.body_style.trim());
-    if (filters.transmission.trim())
-      params.set("transmission", filters.transmission.trim());
-    if (filters.newly_added.trim())
-      params.set("newly_added", filters.newly_added.trim());
+    if (filters.auction_house.trim()) params.set("auction_house", filters.auction_house.trim());
+    if (filters.body_style.trim()) params.set("body_style", filters.body_style.trim());
+    if (filters.transmission.trim()) params.set("transmission", filters.transmission.trim());
+    if (filters.newly_added.trim()) params.set("newly_added", filters.newly_added.trim());
 
-    // no_reserve: ONLY add if checkbox is checked (true)
+    // no_reserve only if checked
     if (filters.no_reserve) {
       params.set("no_reserve", "true");
     }
-    // If unchecked → do NOT send no_reserve at all (API default)
 
-    // Sort: only add if no other sort exists
-    if (!params.has("sort")) {
-      params.set("sort", "auction_date desc");
-    }
+    // Default sort if none set
+    if (!params.has("sort")) params.set("sort", "auction_date desc");
 
-    // Push clean URL
-    const queryString = params.toString();
-    router.push(queryString ? `${pathname}?${queryString}` : pathname, {
-      scroll: false,
-    });
+    // Pagination defaults (page 1, limit 20)
+    if (!params.has("page")) params.set("page", "1");
+    if (!params.has("limit")) params.set("limit", "20");
+
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
     setIsFilterOpen(false);
   };
 
   const resetFilters = () => {
     setFilters({
+      title: "",
       make: "",
       model: "",
       year_min: "",
@@ -114,40 +106,30 @@ export default function AdvancedSearch() {
 
     setFilters(updated);
 
-    // Auto-apply (same logic as applyFilters)
     setTimeout(() => {
       const params = new URLSearchParams();
 
+      if (updated.title.trim()) params.set("title", updated.title.trim());
       if (updated.make.trim()) params.set("make", updated.make.trim());
       if (updated.model.trim()) params.set("model", updated.model.trim());
-      if (updated.year_min.trim())
-        params.set("year_min", updated.year_min.trim());
-      if (updated.year_max.trim())
-        params.set("year_max", updated.year_max.trim());
-      if (updated.price_min.trim())
-        params.set("price_min", updated.price_min.trim());
-      if (updated.price_max.trim())
-        params.set("price_max", updated.price_max.trim());
+      if (updated.year_min.trim()) params.set("year_min", updated.year_min.trim());
+      if (updated.year_max.trim()) params.set("year_max", updated.year_max.trim());
+      if (updated.price_min.trim()) params.set("price_min", updated.price_min.trim());
+      if (updated.price_max.trim()) params.set("price_max", updated.price_max.trim());
       if (updated.state.trim()) params.set("state", updated.state.trim());
-      if (updated.auction_house.trim())
-        params.set("auction_house", updated.auction_house.trim());
-      if (updated.body_style.trim())
-        params.set("body_style", updated.body_style.trim());
-      if (updated.transmission.trim())
-        params.set("transmission", updated.transmission.trim());
-      if (updated.newly_added.trim())
-        params.set("newly_added", updated.newly_added.trim());
+      if (updated.auction_house.trim()) params.set("auction_house", updated.auction_house.trim());
+      if (updated.body_style.trim()) params.set("body_style", updated.body_style.trim());
+      if (updated.transmission.trim()) params.set("transmission", updated.transmission.trim());
+      if (updated.newly_added.trim()) params.set("newly_added", updated.newly_added.trim());
 
-      // no_reserve only if true
       if (updated.no_reserve) params.set("no_reserve", "true");
 
-      // Default sort only if needed
       if (!params.has("sort")) params.set("sort", "auction_date desc");
+      if (!params.has("page")) params.set("page", "1");
+      if (!params.has("limit")) params.set("limit", "20");
 
-      const queryString = params.toString();
-      router.push(queryString ? `${pathname}?${queryString}` : pathname, {
-        scroll: false,
-      });
+      const query = params.toString();
+      router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
     }, 100);
   };
 
@@ -155,22 +137,37 @@ export default function AdvancedSearch() {
     <section className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-4xl font-bold text-gray-900 mb-2">
-            Advanced Search
-          </h2>
-          <p className="text-gray-600">
-            Find your dream classic with our comprehensive search engine
-          </p>
+          <h2 className="text-4xl font-bold text-gray-900 mb-2">Advanced Search</h2>
+          <p className="text-gray-600">Find your dream classic with our comprehensive search engine</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
-          <div className="flex flex-col md:flex-row gap-4 items-stretch justify-end">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch">
+            {/* Title Search Bar */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                name="title"
+                value={filters.title}
+                onChange={handleChange}
+                placeholder="Search by keyword or title..."
+                className="w-full pl-14 pr-6 py-5 bg-gray-100 rounded-xl text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-blue-200 text-lg"
+              />
+            </div>
+
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className="flex items-center justify-center gap-3 px-8 py-5 border-2 border-gray-300 rounded-xl hover:border-gray-400 transition whitespace-nowrap"
             >
               <Filter className="w-5 h-5" />
               <span className="font-medium">Filter</span>
+            </button>
+
+            <button
+              onClick={applyFilters}
+              className="px-12 py-5 bg-indigo-900 text-white font-bold rounded-xl hover:bg-indigo-800 transition"
+            >
+              Search
             </button>
           </div>
 

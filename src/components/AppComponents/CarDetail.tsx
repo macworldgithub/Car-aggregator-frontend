@@ -1,61 +1,82 @@
 import Image from "next/image";
-import { Heart, Calendar, MapPin, Clock } from "lucide-react";
+import { Heart, Calendar, MapPin, Clock, Loader2 } from "lucide-react";
 
-interface CarDetailProps {
-  car?: {
-    title: string;
-    year: string;
-    make: string;
-    model: string;
-    priceRange: string;
-    badges: string[];
-    description: string;
-    provenance: string;
-    specs: {
-      engine?: string;
-      transmission?: string;
-      odometer?: string;
-      bodyStyle?: string;
-      exterior?: string;
-      interior?: string;
-    };
-    auction: {
-      house: string;
-      date: string;
-      location: string;
-      type: string;
-      time: string;
-    };
-  };
+interface AuctionLot {
+  _id: string;
+  title?: string;
+  make?: string;
+  model?: string;
+  year?: number;
+  images: string[];
+  price?: { current?: number };
+  price_range?: { low?: number; high?: number };
+  auction_date?: string | null;
+  auction_end?: string | null;
+  location?: string | { city?: string; state?: string };
+  source?: string;
+  description?: string;
+  provenance?: string;
+  odometer?: string;
+  reserve?: string;
+  body_style?: string;
+  transmission?: string;
+  fuel_type?: string;
+  buyers_premium_pct?: number;
+  url?: string;
 }
 
-export default function CarDetail({ car }: CarDetailProps) {
-  const defaultCar = {
-    title: "1969 Ford Falcon XY GT",
-    priceRange: "$180,000 - $220,000",
-    badges: ["No Reserve", "Matching Numbers", "Documented"],
-    description:
-      "This exceptional 1969 Ford Falcon XY GT is a stunning example of Australian muscle car heritage. Finished in its original Candy Apple Red with black interior, this matching numbers example has undergone a comprehensive restoration to the highest standards.",
-    provenance:
-      "Originally delivered new to Melbourne, this XY GT has been meticulously maintained throughout its life. Complete service history available with original build sheets and documentation.",
+interface CarDetailProps {
+  auctionLot: AuctionLot;
+}
+
+export default function CarDetail({ auctionLot }: CarDetailProps) {
+
+  // Transform API data to component format
+  const data = {
+    title: auctionLot.title || `${auctionLot.year || ''} ${auctionLot.make || ''} ${auctionLot.model || ''}`.trim() || "Untitled Auction",
+    year: auctionLot.year?.toString() || "",
+    make: auctionLot.make || "",
+    model: auctionLot.model || "",
+    priceRange: auctionLot.price_range?.low && auctionLot.price_range?.high
+      ? `$${auctionLot.price_range.low.toLocaleString()} – $${auctionLot.price_range.high.toLocaleString()}`
+      : auctionLot.price?.current
+      ? `$${auctionLot.price.current.toLocaleString()}`
+      : "Price on request",
+    badges: auctionLot.reserve === "No" ? ["No Reserve"] : [],
+    description: auctionLot.description || "No description available.",
+    provenance: auctionLot.provenance || "Provenance information not available.",
     specs: {
-      engine: "351 Windsor V8",
-      transmission: "4-Speed Manual",
-      odometer: "54,320 km",
-      bodyStyle: "2-Door Coupe",
-      exterior: "Candy Apple Red",
-      interior: "Black Vinyl",
+      engine: "Engine info not available", // API may not have this
+      transmission: auctionLot.transmission || "Transmission info not available",
+      odometer: auctionLot.odometer || "Odometer not available",
+      bodyStyle: auctionLot.body_style || "Body style not available",
+      exterior: "Exterior info not available",
+      interior: "Interior info not available",
     },
     auction: {
-      house: "Shannons Auctions",
-      date: "December 15, 2025",
-      location: "Melbourne, VIC",
-      type: "In-Person & Online",
-      time: "2:00 PM AEDT",
+      house: auctionLot.source || "Online Auction",
+      date: auctionLot.auction_end || auctionLot.auction_date
+        ? new Date(auctionLot.auction_end || auctionLot.auction_date!).toLocaleDateString("en-AU", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        : "Date TBA",
+      location: typeof auctionLot.location === "string"
+        ? auctionLot.location
+        : [auctionLot.location?.city, auctionLot.location?.state].filter(Boolean).join(", ") || "Australia",
+      type: "Online Auction",
+      time: auctionLot.auction_end || auctionLot.auction_date
+        ? new Date(auctionLot.auction_end || auctionLot.auction_date!).toLocaleTimeString("en-AU", {
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : "Time TBA",
     },
   };
 
-  const data = car || defaultCar;
+
+}
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:py-12">

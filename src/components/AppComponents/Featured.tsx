@@ -97,12 +97,10 @@ export default function FeaturedLots() {
         setLoading(true);
         setError(null);
 
-        const params = new URLSearchParams(searchParams.toString());
-
-        // Set defaults ONLY if missing
-        if (!params.has("sort")) params.set("sort", "auction_date desc");
-        if (!params.has("page")) params.set("page", "1");
-        if (!params.has("limit")) params.set("limit", "20"); // default items per page
+        const params = new URLSearchParams({
+          newly_added: "30d", // zyada din ka data → zyada items aayenge
+          // sort: "auction_end asc", // agar upcoming auctions pehle chahiye to uncomment kar dena
+        });
 
         const url = `https://aggregator.omnisuiteai.com/api/search?${params.toString()}`;
 
@@ -116,25 +114,20 @@ export default function FeaturedLots() {
 
         const json = await res.json();
 
-        // Handle paginated response
-        const resultsArray = json.results || json || []; // fallback if no "results" key
-        const pag = json.pagination || {};
-
-        const validLots = resultsArray.filter(
-          (item: any) =>
-            item.title?.trim() || (item.make?.trim() && item.model?.trim()),
+        console.log("Total items from API:", data.length);
+        console.log(
+          "First few items titles:",
+          data
+            .slice(0, 3)
+            .map(
+              (item) =>
+                item.title ||
+                `${item.year || ""} ${item.make || ""} ${item.model || ""}`
+            )
         );
 
-        setLots(validLots);
-
-        // Update pagination from real API data
-        setPagination({
-          page: Number(pag.page || searchParams.get("page") || 1),
-          totalPages: Number(pag.totalPages || 1),
-          total: Number(pag.total || validLots.length),
-          hasNext: pag.has_next === true || pag.hasNext === true,
-          hasPrev: pag.has_prev === true || pag.hasPrev === true,
-        });
+        // Koi filter nahi laga rahe → sab show karo
+        setLots(data);
       } catch (err: any) {
         console.error("Fetch error:", err);
         setError("Failed to load lots. Please try again.");
@@ -189,8 +182,8 @@ export default function FeaturedLots() {
             </button>
           </div>
         ) : lots.length === 0 ? (
-          <div className="text-center py-16 text-gray-600 text-xl font-medium">
-            No matching vehicles found
+          <div className="text-center py-16 text-gray-600">
+            No lots available right now
           </div>
         ) : (
           <div className="space-y-10">
@@ -211,7 +204,7 @@ export default function FeaturedLots() {
                     .filter(Boolean)
                     .join(" ")
                     .trim() ||
-                  "Classic Vehicle";
+                  "Classic Vehicle / Item";
 
                 const badge = getBadge(car);
 

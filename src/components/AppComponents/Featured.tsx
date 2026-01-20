@@ -89,8 +89,7 @@ export default function FeaturedLots() {
         setError(null);
 
         const params = new URLSearchParams({
-          newly_added: "30d", // zyada din ka data → zyada items aayenge
-          // sort: "auction_end asc", // agar upcoming auctions pehle chahiye to uncomment kar dena
+          newly_added: "30d", 
         });
 
         const url = `https://aggregator.omnisuiteai.com/api/search?${params}`;
@@ -118,7 +117,7 @@ export default function FeaturedLots() {
             )
         );
 
-        // Koi filter nahi laga rahe → sab show karo
+       
         setLots(data);
       } catch (err: any) {
         console.error("Fetch failed:", err);

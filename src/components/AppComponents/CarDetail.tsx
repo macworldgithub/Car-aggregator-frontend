@@ -1,219 +1,371 @@
-import Image from "next/image";
-import { Heart, Calendar, MapPin, Clock } from "lucide-react";
+"use client";
 
-interface CarDetailProps {
-  car?: {
-    title: string;
-    year: string;
-    make: string;
-    model: string;
-    priceRange: string;
-    badges: string[];
-    description: string;
-    provenance: string;
-    specs: {
-      engine?: string;
-      transmission?: string;
-      odometer?: string;
-      bodyStyle?: string;
-      exterior?: string;
-      interior?: string;
-    };
-    auction: {
-      house: string;
-      date: string;
-      location: string;
-      type: string;
-      time: string;
-    };
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { Heart, Calendar, MapPin, Clock, Loader2 } from "lucide-react";
+
+interface LotDetail {
+  _id: string;
+  title?: string;
+  year?: number;
+  make?: string;
+  model?: string;
+  images?: string[];
+  price_range?: { low?: number; high?: number };
+  reserve?: string;
+  description?: string;
+  provenance?: string;
+  auction_date?: string;
+  auction_end?: string;
+  location?: string | { city?: string; state?: string };
+  source?: string;
+  url?: string;
+  specs?: {
+    engine?: string;
+    transmission?: string;
+    odometer?: string;
+    bodyStyle?: string;
+    exterior?: string;
+    interior?: string;
   };
 }
 
-export default function CarDetail({ car }: CarDetailProps) {
-  const defaultCar = {
-    title: "1969 Ford Falcon XY GT",
-    priceRange: "$180,000 - $220,000",
-    badges: ["No Reserve", "Matching Numbers", "Documented"],
-    description:
-      "This exceptional 1969 Ford Falcon XY GT is a stunning example of Australian muscle car heritage. Finished in its original Candy Apple Red with black interior, this matching numbers example has undergone a comprehensive restoration to the highest standards.",
-    provenance:
-      "Originally delivered new to Melbourne, this XY GT has been meticulously maintained throughout its life. Complete service history available with original build sheets and documentation.",
-    specs: {
-      engine: "351 Windsor V8",
-      transmission: "4-Speed Manual",
-      odometer: "54,320 km",
-      bodyStyle: "2-Door Coupe",
-      exterior: "Candy Apple Red",
-      interior: "Black Vinyl",
-    },
-    auction: {
-      house: "Shannons Auctions",
-      date: "December 15, 2025",
-      location: "Melbourne, VIC",
-      type: "In-Person & Online",
-      time: "2:00 PM AEDT",
-    },
+const mapSourceToHouse = (source?: string): string => {
+  const map: Record<string, string> = {
+    shannons: "Shannons",
+    lloydsonline: "Lloyds Auctions",
+    grays: "Grays",
+    pickles: "Pickles",
+    allbids: "Allbids",
+    carbids: "Carbids",
+    bennettsclassicauctions: "Bennetts Classic Auctions",
+    collectingcars: "Collecting Cars",
+    seven82motors: "Seven82Motors",
+  };
+  return map[source?.toLowerCase() || ""] || source || "Online Auction";
+};
+
+export default function AuctionDetailPage() {
+  const searchParams = useSearchParams();
+  const lotId = searchParams.get("id");
+
+  const [lot, setLot] = useState<LotDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lotId) {
+      setError("No lot ID provided");
+      setLoading(false);
+      return;
+    }
+
+    const fetchLotDetail = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const url = `https://aggregator.omnisuiteai.com/api/lot/${lotId}`;
+
+        const res = await fetch(url, {
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          throw new Error(
+            `Failed to fetch lot: ${res.status} ${res.statusText}`,
+          );
+        }
+
+        const data = await res.json();
+        setLot(data);
+      } catch (err: any) {
+        console.error("Detail fetch error:", err);
+        setError("Failed to load vehicle details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLotDetail();
+  }, [lotId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="w-16 h-16 animate-spin text-indigo-900" />
+      </div>
+    );
+  }
+
+  if (error || !lot) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 text-center px-4">
+        <div>
+          <h2 className="text-3xl font-bold text-red-600 mb-4">Oops!</h2>
+          <p className="text-xl text-gray-700 mb-6">
+            {error || "Lot not found"}
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="px-8 py-4 bg-indigo-900 text-white font-bold rounded-xl hover:bg-indigo-800 transition"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Format helpers
+  const formatPrice = () => {
+    if (lot.price_range?.low && lot.price_range?.high) {
+      return `$${lot.price_range.low.toLocaleString()} – $${lot.price_range.high.toLocaleString()}`;
+    }
+    return "Price on request";
   };
 
-  const data = car || defaultCar;
+  const getBadges = () => {
+    const badges: { text: string; color: string }[] = [];
+    if (lot.reserve === "No")
+      badges.push({ text: "No Reserve", color: "bg-red-600" });
+    // Add more if API returns other flags (e.g. Matching Numbers, Documented)
+    return badges;
+  };
+
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return "Date TBA";
+    try {
+      return new Date(dateStr).toLocaleDateString("en-AU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return "Date TBA";
+    }
+  };
+
+  const getLocation = (loc?: string | { city?: string; state?: string }) => {
+    if (!loc) return "Australia";
+    if (typeof loc === "string") return loc;
+    const parts = [loc.city, loc.state].filter(Boolean);
+    return parts.length ? parts.join(", ") : "Australia";
+  };
+
+  // Image handling
+  const allImages = lot.images || [];
+  const mainImage =
+    allImages[0]?.split("?")[0] || "/images/placeholder-car.jpg";
+  const thumbnails = allImages.slice(1, 4).map((img) => img.split("?")[0]); // up to 3 thumbnails
+
+  const badges = getBadges();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:py-12">
       <div className="max-w-7xl mx-auto">
-        {/* Title + Price + Badges + Favorite */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+        {/* Image Gallery: 1 large + 3 small */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
+          {/* Large main image */}
+          <div className="lg:col-span-3 bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div className="relative aspect-[4/3] md:aspect-[16/9]">
+              <img
+                src={mainImage}
+                alt={lot.title || "Vehicle"}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+
+          {/* 3 small thumbnails */}
+          <div className="lg:col-span-1 grid grid-cols-3 lg:grid-cols-1 gap-4">
+            {thumbnails.map((thumb, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-md overflow-hidden aspect-square"
+              >
+                <img
+                  src={mainImage}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+
+            {/* Fill remaining spots with placeholders if < 3 thumbnails */}
+            {thumbnails.length < 3 &&
+              Array.from({ length: 3 - thumbnails.length }).map((_, i) => (
+                <div
+                  key={`placeholder-${i}`}
+                  className="bg-white rounded-2xl shadow-md overflow-hidden aspect-square"
+                >
+                  <img
+                    src={mainImage}
+                    alt="Placeholder"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+          </div>
+        </div>
+
+        {/* Title, Badges, Price, Heart */}
+        <div className="bg-white rounded-3xl shadow-xl p-8 mb-10">
           <div className="flex flex-col md:flex-row justify-between items-start gap-6">
             <div>
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-4">
-                {data.title}
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+                {lot.title ||
+                  `${lot.year || ""} ${lot.make || ""} ${lot.model || ""}`.trim()}
               </h1>
 
               {/* Badges */}
               <div className="flex flex-wrap gap-3 mb-4">
-                {data.badges.map((badge, i) => (
+                {badges.map((b, i) => (
                   <span
                     key={i}
-                    className={`px-4 py-2 rounded-full text-xs font-bold text-white ${
-                      badge === "No Reserve"
-                        ? "bg-red-600"
-                        : badge === "Matching Numbers"
-                        ? "bg-orange-600"
-                        : "bg-green-600"
-                    }`}
+                    className={`px-5 py-2 rounded-full text-sm font-bold text-white ${b.color}`}
                   >
-                    {badge}
+                    {b.text}
                   </span>
                 ))}
               </div>
 
-              <p className="text-xl md:text-3xl font-extrabold text-indigo-900">
-                {data.priceRange}
+              <p className="text-3xl md:text-4xl font-extrabold text-indigo-900">
+                {formatPrice()}
               </p>
             </div>
 
-            <button className="p-3 border border-gray-300 rounded-full hover:bg-gray-50 transition">
-              <Heart className="w-7 h-7 text-gray-600 hover:text-red-500 hover:fill-red-500 transition" />
+            <button className="p-4 border border-gray-300 rounded-full hover:bg-gray-50 transition">
+              <Heart className="w-8 h-8 text-gray-600 hover:text-red-500 hover:fill-red-500 transition" />
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Side - Content */}
+          {/* Left Content */}
           <div className="lg:col-span-2 space-y-10">
             {/* Description */}
-            <section className="bg-white rounded-3xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-5">
-                Description
-              </h2>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                {data.description}
-              </p>
-            </section>
+            {lot.description && (
+              <section className="bg-white rounded-3xl p-8 shadow-lg">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+                  Description
+                </h2>
+                <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line">
+                  {lot.description}
+                </p>
+              </section>
+            )}
 
             {/* Provenance */}
-            <section className="bg-white rounded-3xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-5">
-                Provenance
-              </h2>
-              <p className="text-gray-700 leading-relaxed text-lg">
-                {data.provenance}
-              </p>
-            </section>
+            {lot.provenance && (
+              <section className="bg-white rounded-3xl p-8 shadow-lg">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
+                  Provenance
+                </h2>
+                <p className="text-gray-700 leading-relaxed text-lg">
+                  {lot.provenance}
+                </p>
+              </section>
+            )}
 
             {/* Specifications */}
-            <section className="bg-white rounded-3xl p-8 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-8">
-                Specifications
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {data.specs.engine && (
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                      <div className="w-5 h-5 bg-indigo-600 rounded"></div>
+            {lot.specs && Object.keys(lot.specs).length > 0 && (
+              <section className="bg-white rounded-3xl p-8 shadow-lg">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
+                  Specifications
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {lot.specs.engine && (
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
+                      <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <div className="w-5 h-5 bg-indigo-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Engine</p>
+                        <p className="font-bold text-gray-900">
+                          {lot.specs.engine}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Engine</p>
-                      <p className="font-bold text-gray-900">
-                        {data.specs.engine}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {data.specs.transmission && (
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <div className="w-5 h-5 bg-blue-600 rounded"></div>
+                  {lot.specs.transmission && (
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <div className="w-5 h-5 bg-blue-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Transmission</p>
+                        <p className="font-bold text-gray-900">
+                          {lot.specs.transmission}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Transmission</p>
-                      <p className="font-bold text-gray-900">
-                        {data.specs.transmission}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {data.specs.odometer && (
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                    <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <div className="w-5 h-5 bg-yellow-600 rounded"></div>
+                  {lot.specs.odometer && (
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
+                      <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <div className="w-5 h-5 bg-yellow-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Odometer</p>
+                        <p className="font-bold text-gray-900">
+                          {lot.specs.odometer}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Odometer</p>
-                      <p className="font-bold text-gray-900">
-                        {data.specs.odometer}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {data.specs.bodyStyle && (
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                      <div className="w-5 h-5 bg-purple-600 rounded"></div>
+                  {lot.specs.bodyStyle && (
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <div className="w-5 h-5 bg-purple-600 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Body Style</p>
+                        <p className="font-bold text-gray-900">
+                          {lot.specs.bodyStyle}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Body Style</p>
-                      <p className="font-bold text-gray-900">
-                        {data.specs.bodyStyle}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {data.specs.exterior && (
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                    <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center">
-                      <div className="w-6 h-6 bg-white rounded-full"></div>
+                  {lot.specs.exterior && (
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
+                      <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center">
+                        <div className="w-6 h-6 bg-white rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Exterior</p>
+                        <p className="font-bold text-gray-900">
+                          {lot.specs.exterior}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Exterior</p>
-                      <p className="font-bold text-gray-900">
-                        {data.specs.exterior}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                  )}
 
-                {data.specs.interior && (
-                  <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
-                      <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                  {lot.specs.interior && (
+                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
+                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
+                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Interior</p>
+                        <p className="font-bold text-gray-900">
+                          {lot.specs.interior}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Interior</p>
-                      <p className="font-bold text-gray-900">
-                        {data.specs.interior}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
 
-          {/* Right Sidebar - Auction Details */}
+          {/* Auction Details Sidebar */}
           <aside className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl p-8 sticky top-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
@@ -225,22 +377,26 @@ export default function CarDetail({ car }: CarDetailProps) {
                     <Calendar className="w-5 h-5 text-indigo-900" />
                   </div>
                   <div>
-                    <p className="font-semibold">{data.auction.house}</p>
-                    <p className="text-sm">{data.auction.date}</p>
+                    <p className="font-semibold">
+                      {mapSourceToHouse(lot.source)}
+                    </p>
+                    <p className="text-sm">
+                      {formatDate(lot.auction_date || lot.auction_end)}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-gray-500" />
                   <div>
-                    <p className="font-medium">{data.auction.location}</p>
-                    <p className="text-sm">{data.auction.type}</p>
+                    <p className="font-medium">{getLocation(lot.location)}</p>
+                    <p className="text-sm">In-Person & Online</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                   <Clock className="w-5 h-5 text-gray-500" />
-                  <p className="font-medium">{data.auction.time}</p>
+                  <p className="font-medium">2:00 PM AEDT</p>
                 </div>
               </div>
 

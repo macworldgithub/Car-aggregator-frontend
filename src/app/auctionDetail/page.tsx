@@ -6,7 +6,5 @@ const page = () => {
     <div>
       <CarDetail />
     </div>
-  )
+  );
 }
-
-export default page;

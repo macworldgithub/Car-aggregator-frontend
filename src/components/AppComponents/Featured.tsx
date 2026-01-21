@@ -44,6 +44,8 @@ const getLocation = (loc?: string | { city?: string; state?: string }) => {
   return [loc.city, loc.state].filter(Boolean).join(", ") || "Australia";
 };
 
+/* ================= COMPONENT ================= */
+
 export default function FeaturedLots() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -60,6 +62,8 @@ export default function FeaturedLots() {
     hasNext: false,
     hasPrev: false,
   });
+
+  /* ================= FETCH ================= */
 
   useEffect(() => {
     const fetchLots = async () => {
@@ -115,6 +119,8 @@ export default function FeaturedLots() {
 
     fetchLots();
   }, [searchParams]);
+
+  /* ================= HANDLERS ================= */
 
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages) return;

@@ -1,10 +1,44 @@
 // components/HeroSection.tsx
 
+"use client";
+
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export default function HeroSection() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialMake = searchParams.get("make") || "";
+  const initialModel = searchParams.get("model") || "";
+  const initialVariant = searchParams.get("variant") || "";
+
+  const [make, setMake] = useState(initialMake);
+  const [model, setModel] = useState(initialModel);
+  const [variant, setVariant] = useState(initialVariant);
+
+  const handleSearch = () => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    // Update or remove params (cleaner UX)
+    if (make.trim()) params.set("make", make.trim());
+    else params.delete("make");
+
+    if (model.trim()) params.set("model", model.trim());
+    else params.delete("model");
+
+    if (variant.trim()) params.set("variant", variant.trim());
+    else params.delete("variant");
+
+    // Optional: reset to page 1 when new search is performed
+    params.set("page", "1");
+
+    router.push(`?${params.toString()}`);
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden from-gray-50 via-white to-blue-50">
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-gray-50 via-white to-blue-50">
       <div className="absolute inset-0 opacity-5">
         <div
           className="absolute inset-0"
@@ -30,31 +64,41 @@ export default function HeroSection() {
             Australia. All in one place. Updated in real-time.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-1 max-w-xl mx-auto lg:mx-0">
+          <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto lg:mx-0">
             <input
               type="text"
               placeholder="Make"
-              className="px-3 py-2 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
+              value={make}
+              onChange={(e) => setMake(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800 flex-1"
             />
             <input
               type="text"
               placeholder="Model"
-              className="px-3 py-2 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800 flex-1"
             />
             <input
               type="text"
               placeholder="Variant"
-              className="px-3 py-2 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800"
+              value={variant}
+              onChange={(e) => setVariant(e.target.value)}
+              className="px-4 py-3 bg-white border border-gray-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-indigo-200 text-gray-800 flex-1"
             />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto lg:mx-0">
-            <button className="w-full sm:w-auto px-12 py-3 bg-indigo-900 text-white font-bold text-lg rounded-xl hover:bg-indigo-800 transition transform hover:scale-105">
+            <button
+              onClick={handleSearch}
+              className="w-full sm:w-auto px-12 py-3 bg-indigo-900 text-white font-bold text-lg rounded-xl hover:bg-indigo-800 transition transform hover:scale-105"
+            >
               Search
             </button>
-            <button className="w-full sm:w-auto px-12 py-3 border-2 border-indigo-900 text-indigo-900 font-bold text-lg rounded-xl hover:bg-indigo-50 transition">
+
+            {/* <button className="w-full sm:w-auto px-12 py-3 border-2 border-indigo-900 text-indigo-900 font-bold text-lg rounded-xl hover:bg-indigo-50 transition">
               View Calendar
-            </button>
+            </button> */}
           </div>
 
           {/* Stats */}
@@ -74,7 +118,7 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Image */}
+        {/* Right Image – unchanged */}
         <div className="relative flex justify-center lg:justify-end">
           <div className="relative w-full max-w-2xl">
             <Image
@@ -85,7 +129,6 @@ export default function HeroSection() {
               className="rounded-2xl shadow-2xl object-cover drop-shadow-2xl"
               priority
             />
-            {/* Optional glow effect */}
             <div className="absolute -inset-4 bg-indigo-600/20 blur-3xl -z-10" />
           </div>
         </div>

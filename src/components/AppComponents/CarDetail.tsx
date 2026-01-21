@@ -1,9 +1,10 @@
+// app/auctionDetail/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Image from "next/image";
 import { Heart, Calendar, MapPin, Clock, Loader2 } from "lucide-react";
+import CarGallery from "./CarGallery"; // Adjust path if needed
 
 interface LotDetail {
   _id: string;
@@ -122,7 +123,7 @@ export default function AuctionDetailPage() {
   // Format helpers
   const formatPrice = () => {
     if (lot.price_range?.low && lot.price_range?.high) {
-      return `$${lot.price_range.low.toLocaleString()} – $${lot.price_range.high.toLocaleString()}`;
+      return `$${lot.price_range.low.toLocaleString()} - $${lot.price_range.high.toLocaleString()}`;
     }
     return "Price on request";
   };
@@ -131,7 +132,7 @@ export default function AuctionDetailPage() {
     const badges: { text: string; color: string }[] = [];
     if (lot.reserve === "No")
       badges.push({ text: "No Reserve", color: "bg-red-600" });
-    // Add more if API returns other flags (e.g. Matching Numbers, Documented)
+    // Add more if API returns other flags
     return badges;
   };
 
@@ -155,61 +156,16 @@ export default function AuctionDetailPage() {
     return parts.length ? parts.join(", ") : "Australia";
   };
 
-  // Image handling
-  const allImages = lot.images || [];
-  const mainImage =
-    allImages[0]?.split("?")[0] || "/images/placeholder-car.jpg";
-  const thumbnails = allImages.slice(1, 4).map((img) => img.split("?")[0]); // up to 3 thumbnails
+  // Clean images from API (remove signatures)
+  const cleanImages = lot.images?.map((img) => img.split("?")[0]) || [];
 
   const badges = getBadges();
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:py-12">
       <div className="max-w-7xl mx-auto">
-        {/* Image Gallery: 1 large + 3 small */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
-          {/* Large main image */}
-          <div className="lg:col-span-3 bg-white rounded-3xl shadow-xl overflow-hidden">
-            <div className="relative aspect-[4/3] md:aspect-[16/9]">
-              <img
-                src={mainImage}
-                alt={lot.title || "Vehicle"}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          </div>
-
-          {/* 3 small thumbnails */}
-          <div className="lg:col-span-1 grid grid-cols-3 lg:grid-cols-1 gap-4">
-            {thumbnails.map((thumb, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-md overflow-hidden aspect-square"
-              >
-                <img
-                  src={mainImage}
-                  alt={`Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-
-            {/* Fill remaining spots with placeholders if < 3 thumbnails */}
-            {thumbnails.length < 3 &&
-              Array.from({ length: 3 - thumbnails.length }).map((_, i) => (
-                <div
-                  key={`placeholder-${i}`}
-                  className="bg-white rounded-2xl shadow-md overflow-hidden aspect-square"
-                >
-                  <img
-                    src={mainImage}
-                    alt="Placeholder"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-          </div>
-        </div>
+        {/* CarGallery at top - pass API images (this is the only image section now) */}
+        <CarGallery images={cleanImages} />
 
         {/* Title, Badges, Price, Heart */}
         <div className="bg-white rounded-3xl shadow-xl p-8 mb-10">
@@ -244,7 +200,7 @@ export default function AuctionDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Content */}
+          {/* Left Content - Description, Provenance, Specs */}
           <div className="lg:col-span-2 space-y-10">
             {/* Description */}
             {lot.description && (
@@ -280,7 +236,7 @@ export default function AuctionDetailPage() {
                   {lot.specs.engine && (
                     <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
                       <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-indigo-600 rounded-full"></div>
+                        <div className="w-5 h-5 bg-indigo-600 rounded"></div>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Engine</p>
@@ -294,7 +250,7 @@ export default function AuctionDetailPage() {
                   {lot.specs.transmission && (
                     <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-blue-600 rounded-full"></div>
+                        <div className="w-5 h-5 bg-blue-600 rounded"></div>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Transmission</p>
@@ -308,7 +264,7 @@ export default function AuctionDetailPage() {
                   {lot.specs.odometer && (
                     <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
                       <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-yellow-600 rounded-full"></div>
+                        <div className="w-5 h-5 bg-yellow-600 rounded"></div>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Odometer</p>
@@ -322,7 +278,7 @@ export default function AuctionDetailPage() {
                   {lot.specs.bodyStyle && (
                     <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
                       <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-purple-600 rounded-full"></div>
+                        <div className="w-5 h-5 bg-purple-600 rounded"></div>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Body Style</p>

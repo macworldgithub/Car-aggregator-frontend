@@ -101,7 +101,7 @@ export default function UpcomingAuctions() {
                   </div>
                 </div>
 
-                <button
+                {/* <button
                   onClick={() => router.push("/auctionDetail")}
                   className={`mt-8 w-full font-semibold py-3.5 rounded-xl transition-all ${
                     auction.buttonStyle === "solid"
@@ -110,7 +110,7 @@ export default function UpcomingAuctions() {
                   }`}
                 >
                   View Auction Details
-                </button>
+                </button> */}
               </div>
             </div>
           ))}
@@ -118,9 +118,9 @@ export default function UpcomingAuctions() {
 
         {/* View Full Calendar Button */}
         <div className="text-center mt-12">
-          <button className="border-2 border-indigo-900 text-indigo-900 font-bold px-10 py-4 rounded-xl hover:bg-indigo-50 transition text-lg">
+          {/* <button className="border-2 border-indigo-900 text-indigo-900 font-bold px-10 py-4 rounded-xl hover:bg-indigo-50 transition text-lg">
             View Full Calendar
-          </button>
+          </button> */}
         </div>
       </div>
     </section>

@@ -3,11 +3,15 @@ import AdvancedSearch from "@/components/AppComponents/AdvancedSearch";
 // import Featured from "@/src/components/AppComponents/Featured";
 import Featured from "@/components/AppComponents/Featured";
 import React from "react";
+import { Suspense } from "react";
 
 const page = () => {
   return (
     <div>
-      <AdvancedSearch />
+      <Suspense fallback={<div>Loading search...</div>}>
+        <AdvancedSearch />
+      </Suspense>
+
       <Featured />
     </div>
   );

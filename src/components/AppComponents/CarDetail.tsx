@@ -95,7 +95,7 @@ export default function AuctionDetailPage() {
         if (data.images?.length > 0) {
           setSelectedImage(data.images[0].split("?")[0]);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setError("Failed to load vehicle details.");
       } finally {
@@ -142,9 +142,11 @@ export default function AuctionDetailPage() {
     if (lot.price_range.low === lot.price_range.high) {
       return `$${lot.price_range.low.toLocaleString()}`;
     }
-    return `$${lot.price_range.low.toLocaleString()} – $${lot.price_range.high.toLocaleString()}`;
-  };
 
+    return `$${lot.price_range.low.toLocaleString()}
+   
+   – $${lot.price_range.high.toLocaleString()}`;
+  };
   const badges = [
     lot.reserve === "No" && { text: "No Reserve", color: "bg-red-600" },
     lot.status && { text: lot.status.replace("_", " "), color: "bg-amber-600" },

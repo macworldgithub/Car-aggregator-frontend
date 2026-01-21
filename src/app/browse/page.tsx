@@ -8,11 +8,10 @@ import { Suspense } from "react";
 const page = () => {
   return (
     <div>
-      <Suspense fallback={<div>Loading search...</div>}>
+      <Suspense fallback={<div>Loading page...</div>}>
         <AdvancedSearch />
+        <Featured />
       </Suspense>
-
-      <Featured />
     </div>
   );
 };

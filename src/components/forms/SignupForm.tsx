@@ -183,8 +183,12 @@ export default function SignupForm() {
       // setTimeout(() => {
       //   window.location.href = '/signin';
       // }, 2000);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }

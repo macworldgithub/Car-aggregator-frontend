@@ -191,7 +191,6 @@ export default function SignInForm() {
         throw new Error(errMsg);
       }
 
-      
       const token =
         data.token || data.access_token || data.accessToken || data.jwt;
 
@@ -199,7 +198,7 @@ export default function SignInForm() {
         throw new Error("No authentication token received from server");
       }
 
-      localStorage.setItem("authToken", token); 
+      localStorage.setItem("authToken", token);
 
       setSuccess("Logged in successfully! Redirecting to home...");
 
@@ -211,8 +210,10 @@ export default function SignInForm() {
       setTimeout(() => {
         router.push("/");
       }, 1200);
-    } catch (err: any) {
-      setError(err.message || "Login failed. Please try again.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Login failed. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -365,7 +366,7 @@ export default function SignInForm() {
 
           {/* Sign up link */}
           <p className="mt-8 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+            Dont have an account?{" "}
             <Link
               href="/signup"
               className="font-bold text-indigo-900 hover:text-indigo-700"

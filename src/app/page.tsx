@@ -5,15 +5,17 @@ import CollectorHub from "../components/AppComponents/CollectorHub";
 import Featured from "../components/AppComponents/Featured";
 import HomeBanner from "../components/AppComponents/HomeBanner";
 import UpcomingAuctions from "../components/AppComponents/UpcomingAuctions";
-
+import { Suspense } from "react";
 export default function Home() {
   return (
     <>
       <HomeBanner />
-      <Featured />
-      <UpcomingAuctions />
-      {/* <AdvancedSearch /> */}
-      <CollectorHub />
+      <Suspense fallback={<div>Loading content...</div>}>
+        <Featured />
+        <UpcomingAuctions />
+        {/* <AdvancedSearch /> */}
+        <CollectorHub />
+      </Suspense>
     </>
   );
 }

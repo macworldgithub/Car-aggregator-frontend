@@ -12,7 +12,7 @@ export default function Home() {
       <HomeBanner />
       <Featured />
       <UpcomingAuctions />
-      <AdvancedSearch />
+      {/* <AdvancedSearch /> */}
       <CollectorHub />
     </>
   );

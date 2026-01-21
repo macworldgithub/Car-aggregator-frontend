@@ -43,7 +43,7 @@ export default function AuctionCalendarHero() {
         </p>
 
         <div className="flex flex-wrap gap-3">
-          {states.map((s) => (
+          {/* {states.map((s) => (
             <Link
               key={s.name}
               href={
@@ -60,6 +60,22 @@ export default function AuctionCalendarHero() {
             >
               {s.name}
             </Link>
+          ))} */}
+
+          {states.map((state) => (
+            <button
+              key={state.name}
+              type="button"
+              disabled
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all cursor-default
+                ${
+                  state.active
+                    ? "bg-indigo-900 text-white shadow-lg"
+                    : "bg-gray-200 text-gray-500 opacity-70"
+                }`}
+            >
+              {state.name}
+            </button>
           ))}
         </div>
       </div>

@@ -3,9 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Calendar, MapPin, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-
-/* ================= TYPES ================= */
-
+const FALLBACK_IMAGE = "/images/ford.png";
 interface AuctionLot {
   _id: string;
   title?: string;
@@ -20,8 +18,6 @@ interface AuctionLot {
   location?: string | { city?: string; state?: string };
   source?: string;
 }
-
-/* ================= HELPERS ================= */
 
 const formatPrice = (lot: AuctionLot) => {
   if (lot.price_range?.low && lot.price_range?.high) {
@@ -135,8 +131,6 @@ export default function FeaturedLots() {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  /* ================= UI ================= */
-
   if (loading)
     return (
       <div className="py-20 flex justify-center">
@@ -154,35 +148,48 @@ export default function FeaturedLots() {
   return (
     <section className="bg-gray-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Debug info (optional) */}
         <p className="text-center text-sm text-gray-600 mb-6">
           Showing {lots.length} of {pagination.total} — Page {pagination.page}{" "}
           of {pagination.totalPages}
         </p>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {lots.map((car) => {
-            const img =
-              car.images?.[0]?.split("?")[0] || "/images/placeholder-car.jpg";
+            // Improved image logic with fallback
+            let imageSrc = FALLBACK_IMAGE;
+
+            if (car.images && car.images.length > 0) {
+              const firstImg = car.images[0]?.split("?")[0]?.trim();
+              if (firstImg && firstImg.length > 5) {
+                // basic sanity check
+                imageSrc = firstImg;
+              }
+            }
 
             const title =
               car.title ||
-              [car.year, car.make, car.model].filter(Boolean).join(" ");
+              [car.year, car.make, car.model].filter(Boolean).join(" ") ||
+              "Classic Car";
 
             return (
               <div
                 key={car._id}
-                className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden"
+                className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden transition-shadow"
               >
-                <img
-                  src={img}
-                  alt={title}
-                  className="h-56 w-full object-cover"
-                />
+                <div className="relative h-56 bg-gray-100">
+                  <img
+                    src={imageSrc}
+                    alt={title}
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      // Extra safety: if image fails to load → fallback
+                      e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
+                  />
+                </div>
 
                 <div className="p-5">
-                  <h3 className="font-bold mb-2">{title}</h3>
+                  <h3 className="font-bold mb-2 line-clamp-2">{title}</h3>
                   <p className="font-extrabold text-indigo-900 mb-3">
                     {formatPrice(car)}
                   </p>
@@ -200,7 +207,7 @@ export default function FeaturedLots() {
 
                   <button
                     onClick={() => router.push(`/auctionDetail?id=${car._id}`)}
-                    className="w-full bg-indigo-900 text-white py-3 rounded-lg"
+                    className="w-full bg-indigo-900 text-white py-3 rounded-lg hover:bg-indigo-800 transition"
                   >
                     View Details
                   </button>
@@ -210,13 +217,12 @@ export default function FeaturedLots() {
           })}
         </div>
 
-        {/* ================= PAGINATION ================= */}
         {pagination.totalPages > 1 && (
           <div className="flex justify-center items-center gap-6 mt-12">
             <button
               disabled={!pagination.hasPrev}
               onClick={() => handlePageChange(pagination.page - 1)}
-              className="px-6 py-3 bg-gray-200 rounded-lg disabled:opacity-50"
+              className="px-6 py-3 bg-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition disabled:hover:bg-gray-200"
             >
               Previous
             </button>
@@ -228,7 +234,7 @@ export default function FeaturedLots() {
             <button
               disabled={!pagination.hasNext}
               onClick={() => handlePageChange(pagination.page + 1)}
-              className="px-6 py-3 bg-indigo-900 text-white rounded-lg disabled:opacity-50"
+              className="px-6 py-3 bg-indigo-900 text-white rounded-lg disabled:opacity-50 hover:bg-indigo-800 transition"
             >
               Next
             </button>

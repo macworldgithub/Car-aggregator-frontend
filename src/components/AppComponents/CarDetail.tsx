@@ -1,10 +1,17 @@
-// app/auctionDetail/page.tsx
 "use client";
-
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Heart, Calendar, MapPin, Clock, Loader2 } from "lucide-react";
-import CarGallery from "./CarGallery"; // Adjust path if needed
+import {
+  Heart,
+  Calendar,
+  MapPin,
+  Clock,
+  Gauge,
+  Car,
+  Wrench,
+  Loader2,
+} from "lucide-react";
+import CarGallery from "./CarGallery";
 
 interface LotDetail {
   _id: string;
@@ -22,6 +29,7 @@ interface LotDetail {
   location?: string | { city?: string; state?: string };
   source?: string;
   url?: string;
+  odometer?: string;
   specs?: {
     engine?: string;
     transmission?: string;
@@ -30,6 +38,7 @@ interface LotDetail {
     exterior?: string;
     interior?: string;
   };
+  status?: string;
 }
 
 const mapSourceToHouse = (source?: string): string => {
@@ -43,6 +52,7 @@ const mapSourceToHouse = (source?: string): string => {
     bennettsclassicauctions: "Bennetts Classic Auctions",
     collectingcars: "Collecting Cars",
     seven82motors: "Seven82Motors",
+    tradinggarage: "Trading Garage",
   };
   return map[source?.toLowerCase() || ""] || source || "Online Auction";
 };
@@ -120,10 +130,13 @@ export default function AuctionDetailPage() {
     );
   }
 
-  // Format helpers
+
   const formatPrice = () => {
     if (lot.price_range?.low && lot.price_range?.high) {
-      return `$${lot.price_range.low.toLocaleString()} - $${lot.price_range.high.toLocaleString()}`;
+      if (lot.price_range.low === lot.price_range.high) {
+        return `$${lot.price_range.low.toLocaleString()}`;
+      }
+      return `$${lot.price_range.low.toLocaleString()} – $${lot.price_range.high.toLocaleString()}`;
     }
     return "Price on request";
   };
@@ -132,7 +145,11 @@ export default function AuctionDetailPage() {
     const badges: { text: string; color: string }[] = [];
     if (lot.reserve === "No")
       badges.push({ text: "No Reserve", color: "bg-red-600" });
-    // Add more if API returns other flags
+    if (lot.status)
+      badges.push({
+        text: lot.status.replace("_", " "),
+        color: "bg-amber-600",
+      });
     return badges;
   };
 
@@ -156,28 +173,34 @@ export default function AuctionDetailPage() {
     return parts.length ? parts.join(", ") : "Australia";
   };
 
-  // Clean images from API (remove signatures)
   const cleanImages = lot.images?.map((img) => img.split("?")[0]) || [];
 
   const badges = getBadges();
 
+  const vehicleInfo = [
+    { label: "Make", value: lot.make || "—" },
+    { label: "Model", value: lot.model || "—" },
+    { label: "Year", value: lot.year || "—" },
+    {
+      label: "Odometer",
+      value: lot.odometer || lot.specs?.odometer || "Not specified",
+    },
+  ].filter((item) => item.value !== "—");
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 md:py-12">
       <div className="max-w-7xl mx-auto">
-        {/* CarGallery at top - pass API images (this is the only image section now) */}
         <CarGallery images={cleanImages} />
 
-        {/* Title, Badges, Price, Heart */}
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-10">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+        <section className="bg-white rounded-3xl shadow-xl p-6 md:p-8 mb-10">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-6">
             <div>
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900">
                 {lot.title ||
                   `${lot.year || ""} ${lot.make || ""} ${lot.model || ""}`.trim()}
               </h1>
 
-              {/* Badges */}
-              <div className="flex flex-wrap gap-3 mb-4">
+              <div className="flex flex-wrap gap-3 mt-4">
                 {badges.map((b, i) => (
                   <span
                     key={i}
@@ -188,55 +211,58 @@ export default function AuctionDetailPage() {
                 ))}
               </div>
 
-              <p className="text-3xl md:text-4xl font-extrabold text-indigo-900">
+              <p className="text-3xl md:text-4xl font-extrabold text-indigo-900 mt-4">
                 {formatPrice()}
               </p>
             </div>
 
-            <button className="p-4 border border-gray-300 rounded-full hover:bg-gray-50 transition">
+            <button className="p-4 border border-gray-300 rounded-full hover:bg-gray-50 transition shrink-0">
               <Heart className="w-8 h-8 text-gray-600 hover:text-red-500 hover:fill-red-500 transition" />
             </button>
           </div>
-        </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
+            {vehicleInfo.map((item, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 rounded-2xl p-5 text-center border border-gray-100 hover:border-indigo-200 transition"
+              >
+                <div className="mx-auto w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-3">
+                  {index === 0 && <Car className="w-6 h-6 text-indigo-700" />}
+                  {index === 1 && (
+                    <Wrench className="w-6 h-6 text-indigo-700" />
+                  )}
+                  {index === 2 && (
+                    <Calendar className="w-6 h-6 text-indigo-700" />
+                  )}
+                  {index === 3 && <Gauge className="w-6 h-6 text-indigo-700" />}
+                </div>
+                <p className="text-sm text-gray-500 font-medium">
+                  {item.label}
+                </p>
+                <p className="text-xl font-bold text-gray-900 mt-1">
+                  {item.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Content - Description, Provenance, Specs */}
+   
           <div className="lg:col-span-2 space-y-10">
-            {/* Description */}
-            {lot.description && (
-              <section className="bg-white rounded-3xl p-8 shadow-lg">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-                  Description
-                </h2>
-                <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line">
-                  {lot.description}
-                </p>
-              </section>
-            )}
-
-            {/* Provenance */}
-            {lot.provenance && (
-              <section className="bg-white rounded-3xl p-8 shadow-lg">
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-                  Provenance
-                </h2>
-                <p className="text-gray-700 leading-relaxed text-lg">
-                  {lot.provenance}
-                </p>
-              </section>
-            )}
-
-            {/* Specifications */}
+          
             {lot.specs && Object.keys(lot.specs).length > 0 && (
               <section className="bg-white rounded-3xl p-8 shadow-lg">
                 <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
-                  Specifications
+                  Full Specifications
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+     
                   {lot.specs.engine && (
                     <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
                       <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-indigo-600 rounded"></div>
+                        <Wrench className="w-5 h-5 text-indigo-600" />
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Engine</p>
@@ -246,82 +272,13 @@ export default function AuctionDetailPage() {
                       </div>
                     </div>
                   )}
-
-                  {lot.specs.transmission && (
-                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-blue-600 rounded"></div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Transmission</p>
-                        <p className="font-bold text-gray-900">
-                          {lot.specs.transmission}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {lot.specs.odometer && (
-                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                      <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-yellow-600 rounded"></div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Odometer</p>
-                        <p className="font-bold text-gray-900">
-                          {lot.specs.odometer}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {lot.specs.bodyStyle && (
-                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                        <div className="w-5 h-5 bg-purple-600 rounded"></div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Body Style</p>
-                        <p className="font-bold text-gray-900">
-                          {lot.specs.bodyStyle}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {lot.specs.exterior && (
-                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                      <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center">
-                        <div className="w-6 h-6 bg-white rounded-full"></div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Exterior</p>
-                        <p className="font-bold text-gray-900">
-                          {lot.specs.exterior}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {lot.specs.interior && (
-                    <div className="flex items-center gap-4 bg-gray-50 rounded-2xl p-5">
-                      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
-                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Interior</p>
-                        <p className="font-bold text-gray-900">
-                          {lot.specs.interior}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+     
                 </div>
               </section>
             )}
           </div>
 
-          {/* Auction Details Sidebar */}
+    
           <aside className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl p-8 sticky top-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-6">
@@ -357,9 +314,14 @@ export default function AuctionDetailPage() {
               </div>
 
               <div className="mt-8 space-y-4">
-                <button className="w-full bg-indigo-900 text-white font-bold py-4 rounded-xl hover:bg-indigo-800 transition">
-                  View Details
-                </button>
+                <a
+                  href={lot.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full bg-indigo-900 text-white font-bold py-4 rounded-xl text-center hover:bg-indigo-800 transition"
+                >
+                  View on {mapSourceToHouse(lot.source)}
+                </a>
                 <button className="w-full border-2 border-indigo-900 text-indigo-900 font-bold py-4 rounded-xl hover:bg-indigo-50 transition">
                   Stay Alert
                 </button>
@@ -370,7 +332,7 @@ export default function AuctionDetailPage() {
 
               <p className="text-xs text-gray-500 mt-6 text-center">
                 Estimate includes buyer’s premium. Contact auction house for
-                full terms and conditions.
+                full terms.
               </p>
             </div>
           </aside>

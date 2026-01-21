@@ -138,14 +138,18 @@ export default function AuctionDetailPage() {
     selectedImage || cleanImages[0] || "/images/fallback-car.jpg";
 
   const formatPrice = () => {
-    if (!lot.price_range?.low) return "Price on request";
-    if (lot.price_range.low === lot.price_range.high) {
-      return `$${lot.price_range.low.toLocaleString()}`;
+    // If price_range doesn't exist or low is missing/undefined → fallback
+    if (!lot.price_range || lot.price_range.low == null) {
+      return "Price on request";
     }
 
-    return `$${lot.price_range.low.toLocaleString()}
-   
-   – $${lot.price_range.high.toLocaleString()}`;
+    const low = lot.price_range.low;
+    const high = lot.price_range.high;
+    if (high == null || low === high) {
+      return `$${low.toLocaleString()}`;
+    }
+
+    return `$${low.toLocaleString()} – $${high.toLocaleString()}`;
   };
   const badges = [
     lot.reserve === "No" && { text: "No Reserve", color: "bg-red-600" },

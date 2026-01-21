@@ -9,8 +9,9 @@ import { Suspense } from "react";
 export default function Home() {
   return (
     <>
-      <HomeBanner />
       <Suspense fallback={<div>Loading content...</div>}>
+        <HomeBanner />
+
         <Featured />
         <UpcomingAuctions />
         {/* <AdvancedSearch /> */}

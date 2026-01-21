@@ -191,11 +191,7 @@ export default function SignInForm() {
         throw new Error(errMsg);
       }
 
-      // ────────────────────────────────────────────────
-      // SAVE TOKEN HERE
-      // Adjust key/field name according to your actual response
-      // Common names: token, access_token, jwt, accessToken
-      // ────────────────────────────────────────────────
+      
       const token =
         data.token || data.access_token || data.accessToken || data.jwt;
 
@@ -203,7 +199,7 @@ export default function SignInForm() {
         throw new Error("No authentication token received from server");
       }
 
-      localStorage.setItem("authToken", token); // ← Token saved here
+      localStorage.setItem("authToken", token); 
 
       setSuccess("Logged in successfully! Redirecting to home...");
 

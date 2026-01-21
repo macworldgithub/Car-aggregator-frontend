@@ -21,9 +21,8 @@ import AuctionCalenderHero from "@/components/AppComponents/AuctionCalendarHero"
 const page = () => {
   return (
     <div>
-      <AuctionCalenderHero />
-
-      <Suspense fallback={<div>Loading auctions...</div>}>
+      <Suspense fallback={<div>Loading page...</div>}>
+        <AuctionCalenderHero />
         <UpcomingAuctions />
       </Suspense>
     </div>
